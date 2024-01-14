@@ -1,18 +1,25 @@
 import express from "express";
-import userRoute from "./routes/user.js"
-import { connectDb } from "./utils/features.js";
-const app = express();
-
-const port=4000;
+import dotenv from "dotenv";
+dotenv.config();
+const port = process.env.PORT || 5000;
+import userRoutes from "./routes/userRoutes";
+import { notFound, errorHandler } from "./middlewares/errorMiddleware";
+import connectDb from "./config/db.js";
+import cookieParser from 'cookie-parser';
 connectDb();
+const app = express();
 app.use(express.json());
-app.get("/",(req,res)=>{
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use("/api/users", userRoutes);
+
+app.get("/", (req, res) => {
   res.send("API Working with /api/v2");
-})
+});
 
-app.use("/api/v1/user",userRoute)
-
+app.use(notFound);
+app.use(errorHandler);
 app.listen(port, () => {
-  console.log({port});
+  console.log({ port });
   console.log(`Server is working  http://localhost:${port}`);
 });
